@@ -5,10 +5,10 @@ import styles from '@/styles/Home.module.css'
 import Banner from '@/components/banner/banner'
 import Card from '@/components/card/card'
 
-import { fetchCoffeeStores } from '@/lib/coffee-stores'
+import { getCoffeeStores } from '@/lib/coffee-stores'
 
 export async function getStaticProps() {
-    const coffeeStores = await fetchCoffeeStores()
+    const coffeeStores = await getCoffeeStores()
 
     return {
         props: {
@@ -38,7 +38,7 @@ export default function Home(props) {
           </div>
           <div className={ styles.cardLayout }>
             { props.coffeeStores.map(store => (
-              <Card key={ store.fsq_id } { ...store } className={ styles.card } />
+              <Card key={ store.id } { ...store } className={ styles.card } />
             )) }
           </div>
       </main>
