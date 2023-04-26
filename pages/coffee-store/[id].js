@@ -1,19 +1,24 @@
+import { useContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import Image from 'next/image'
 
 import cls from 'classnames'
 import { getCoffeeStores } from '@/lib/coffee-stores'
+import { StoreContext } from '@/contexts/store.context'
+
+import { isEmpty } from '@/utils'
 
 import styles from '../../styles/coffee-store.module.css'
 
 export async function getStaticProps(staticProps) {
-    const coffeeStores = await getCoffeeStores()
     const params = staticProps.params
+    const coffeeStores = await getCoffeeStores()
+    const coffeeStore = coffeeStores.find(coffeeStore => coffeeStore.id.toString() === params.id)
 
     return {
         props: {
-            coffeeStore: coffeeStores.find(coffeeStore => coffeeStore.id.toString() === params.id)
+            coffeeStore: coffeeStore ? coffeeStore : {}
         }
     }
 }
@@ -42,7 +47,24 @@ const CoffeeStore = (props) => {
     if (router.isFallback) {
         return <div>Loading...</div>
     }
-    const { name, address, imgUrl } = props.coffeeStore
+
+    const id = router.query.id
+    const [coffeeStore, setCoffeeStore] = useState(props.coffeeStore)
+
+    const { state: { coffeeStores } } = useContext(StoreContext)
+
+    useEffect(() => {
+        if (isEmpty(props.coffeeStore)) {
+            if (coffeeStores.length > 0) {
+                const findCoffeeStoreById = coffeeStores.find((coffeeStore) => {
+                    return coffeeStore.id.toString() === id
+                })
+                setCoffeeStore(findCoffeeStoreById)
+            }
+        }
+    }, [id])
+
+    const { name, address, imgUrl } = coffeeStore
 
     return (
         <div className={ styles.layout }>        

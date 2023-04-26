@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useContext, useEffect } from 'react'
 
 import Head from 'next/head'
 import Image from 'next/image'
@@ -8,6 +8,7 @@ import Banner from '@/components/banner/banner'
 import Card from '@/components/card/card'
 
 import { getCoffeeStores } from '@/lib/coffee-stores'
+import { ACTIONS_TYPES, StoreContext } from '@/contexts/store.context'
 
 import useTrackLocation from '../hooks/use-track-location'
 
@@ -22,12 +23,18 @@ export async function getStaticProps() {
 }
 
 export default function Home(props) {
-    const { handleTrackLocation, latLong, errorMessage, isFindingLocation } = useTrackLocation()
+    const { handleTrackLocation, errorMessage, isFindingLocation } = useTrackLocation()
+    const { dispatch, state: { coffeeStores, latLong } } = useContext(StoreContext)
 
     useEffect(() => {
         const setCoffeeStoresByLocation = async () => {
-            const result = await getCoffeeStores(latLong, 20)
-            console.log(result)
+            const result = await getCoffeeStores(latLong, 18)
+            dispatch({
+                type: ACTIONS_TYPES.SET_COFFEE_STORES,
+                payload: {
+                    coffeeStores: result
+                }
+            })
         }
 
         setCoffeeStoresByLocation()
@@ -52,6 +59,18 @@ export default function Home(props) {
                     <Image src="/static/hero-image.png" width={800} height={400} alt="" />
                 </div>
                 <div className={ styles.sectionWrapper }>
+                    { coffeeStores.length > 0 && (
+                        <>
+                            <h2 className={ styles.heading2 }>Stores near me</h2>
+                            <div className={ styles.cardLayout }>
+                                { coffeeStores.map(store => (
+                                    <Card key={ store.id } { ...store } className={ styles.card } />
+                                )) }
+                            </div>
+                        </>
+                    ) }
+                </div>
+                <div className={ styles.sectionWrapper }>
                     { props.coffeeStores.length > 0 && (
                         <>
                             <h2 className={ styles.heading2 }>Udi stores</h2>
@@ -63,7 +82,6 @@ export default function Home(props) {
                         </>
                     ) }
                 </div>
-
             </main>
         </div>
     )
