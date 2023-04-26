@@ -27,12 +27,13 @@ export default function Home(props) {
     const { dispatch, state: { coffeeStores, latLong } } = useContext(StoreContext)
 
     useEffect(() => {
-        const setCoffeeStoresByLocation = async () => {
-            const result = await getCoffeeStores(latLong, 18)
+        const setCoffeeStoresByLocation = async () => {  
+            const result = await fetch(`api/coffee-store?latLong=${latLong}&limit=18`)
+            const coffeeStores = await result.json()
             dispatch({
                 type: ACTIONS_TYPES.SET_COFFEE_STORES,
                 payload: {
-                    coffeeStores: result
+                    coffeeStores
                 }
             })
         }
