@@ -57,7 +57,7 @@ export default function Home(props) {
                 <Banner handleButtonClick={ handleButtonClick } buttonText={isFindingLocation ? "Locating..." : "View stores nearby"} />
                 { errorMessage && <p>Something went wrong: {errorMessage}</p> }
                 <div className={ styles.heroImage }>
-                    <Image src="/static/hero-image.png" width={800} height={400} alt="" />
+                    <Image src="/static/hero-image.png" width={800} height={400} alt="hero-image" />
                 </div>
                 <div className={ styles.sectionWrapper }>
                     { coffeeStores.length > 0 && (

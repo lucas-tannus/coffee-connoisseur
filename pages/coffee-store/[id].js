@@ -50,7 +50,7 @@ const CoffeeStore = (props) => {
 
     const id = router.query.id
     const [coffeeStore, setCoffeeStore] = useState(props.coffeeStore)
-    const [voting, setVoting] = useState(0)
+    const [votingCount, setVotingCount] = useState(0)
 
     const { state: { coffeeStores } } = useContext(StoreContext)
 
@@ -60,16 +60,31 @@ const CoffeeStore = (props) => {
         if (data && data.length > 0) {
             const [coffeeStore] = data
             setCoffeeStore(coffeeStore)
+            setVotingCount(coffeeStore.voting)
         }
     }, [data])
 
-    const handleUpvoteButton = () => {
-        setVoting(voting + 1)
+    const handleUpvoteButton = async () => {
+        try {
+            const coffeeStore = await fetch('/api/favouriteCoffeeStoreById', {
+                method: 'PUT',
+                headers: {
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify({ id })
+            })
+
+            if (coffeeStore && coffeeStore.length > 0) {
+                setVotingCount(votingCount + 1)
+            }
+        } catch (error) {
+            console.error('Error creating coffee store', error)
+        }
     }
 
     const handleCreateCoffeeStore = async (coffeeStore) => {
         try {
-            const { id, name, address, imgUrl, voting } = coffeeStore
+            const { id, name, address, imgUrl } = coffeeStore
 
             await fetch('/api/createCoffeeStore', {
                 method: 'POST',
@@ -96,13 +111,12 @@ const CoffeeStore = (props) => {
                     return coffeeStore.id.toString() === id
                 })
                 setCoffeeStore(findCoffeeStoreById)
-                setVoting(findCoffeeStoreById.voting)
                 handleCreateCoffeeStore(findCoffeeStoreById)
             }
         } else {
             handleCreateCoffeeStore(props.coffeeStore)
         }
-    }, [id, props.coffeeStore, coffeeStores])
+    }, [id, props.coffeeStore])
 
     const { name, address, imgUrl } = coffeeStore
 
@@ -128,12 +142,12 @@ const CoffeeStore = (props) => {
                 </div>
                 <div className={ cls("glass", styles.col2) }>
                     <div className={ styles.iconWrapper }>
-                        <Image src="/static/icons/places.svg" width="24" height="24" />
+                        <Image src="/static/icons/places.svg" width="24" height="24" alt="address" />
                         <p className={ styles.text }>{ address }</p>
                     </div>
                     <div className={ styles.iconWrapper }>
-                        <Image src="/static/icons/star.svg" width="24" height="24" />
-                        <p className={ styles.text }>{ voting }</p>
+                        <Image src="/static/icons/star.svg" width="24" height="24" alt="star" />
+                        <p className={ styles.text }>{ votingCount }</p>
                     </div>
                     <button className={ styles.upvoteButton } onClick={ handleUpvoteButton }>
                         Up vote!
