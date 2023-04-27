@@ -43,10 +43,6 @@ export async function getStaticPaths() {
 
 const CoffeeStore = (props) => {
     const router = useRouter()
-    
-    if (router.isFallback) {
-        return <div>Loading...</div>
-    }
 
     const id = router.query.id
     const [coffeeStore, setCoffeeStore] = useState(props.coffeeStore)
@@ -63,6 +59,24 @@ const CoffeeStore = (props) => {
             setVotingCount(coffeeStore.voting)
         }
     }, [data])
+
+    useEffect(() => {
+        if (isEmpty(props.coffeeStore)) {
+            if (coffeeStores.length > 0) {
+                const findCoffeeStoreById = coffeeStores.find((coffeeStore) => {
+                    return coffeeStore.id.toString() === id
+                })
+                setCoffeeStore(findCoffeeStoreById)
+                handleCreateCoffeeStore(findCoffeeStoreById)
+            }
+        } else {
+            handleCreateCoffeeStore(props.coffeeStore)
+        }
+    }, [id, props, props.coffeeStore, coffeeStores])
+
+    if (router.isFallback) {
+        return <div>Loading...</div>
+    }
 
     const handleUpvoteButton = async () => {
         try {
@@ -103,20 +117,6 @@ const CoffeeStore = (props) => {
             console.error('Error creating coffee store', error)
         }
     }   
-
-    useEffect(() => {
-        if (isEmpty(props.coffeeStore)) {
-            if (coffeeStores.length > 0) {
-                const findCoffeeStoreById = coffeeStores.find((coffeeStore) => {
-                    return coffeeStore.id.toString() === id
-                })
-                setCoffeeStore(findCoffeeStoreById)
-                handleCreateCoffeeStore(findCoffeeStoreById)
-            }
-        } else {
-            handleCreateCoffeeStore(props.coffeeStore)
-        }
-    }, [id, props.coffeeStore])
 
     const { name, address, imgUrl } = coffeeStore
 
