@@ -7,9 +7,13 @@ import cls from 'classnames'
 import { getCoffeeStores } from '@/lib/coffee-stores'
 import { StoreContext } from '@/contexts/store.context'
 
+import useSWR from 'swr'
+
 import { isEmpty } from '@/utils'
 
 import styles from '../../styles/coffee-store.module.css'
+
+const fetcher = (...args) => fetch(...args).then((res) => res.json())
 
 export async function getStaticProps(staticProps) {
     const params = staticProps.params
@@ -37,10 +41,6 @@ export async function getStaticPaths() {
     }
 }
 
-const handleUpvoteButton = () => {
-    console.log('handle up vote')
-}
-
 const CoffeeStore = (props) => {
     const router = useRouter()
     
@@ -50,8 +50,22 @@ const CoffeeStore = (props) => {
 
     const id = router.query.id
     const [coffeeStore, setCoffeeStore] = useState(props.coffeeStore)
+    const [voting, setVoting] = useState(0)
 
     const { state: { coffeeStores } } = useContext(StoreContext)
+
+    const { data } = useSWR(`/api/getCoffeeStoreById?id=${id}`, fetcher)
+
+    useEffect(() => {
+        if (data && data.length > 0) {
+            const [coffeeStore] = data
+            setCoffeeStore(coffeeStore)
+        }
+    }, [data])
+
+    const handleUpvoteButton = () => {
+        setVoting(voting + 1)
+    }
 
     const handleCreateCoffeeStore = async (coffeeStore) => {
         try {
@@ -82,6 +96,7 @@ const CoffeeStore = (props) => {
                     return coffeeStore.id.toString() === id
                 })
                 setCoffeeStore(findCoffeeStoreById)
+                setVoting(findCoffeeStoreById.voting)
                 handleCreateCoffeeStore(findCoffeeStoreById)
             }
         } else {
@@ -118,7 +133,7 @@ const CoffeeStore = (props) => {
                     </div>
                     <div className={ styles.iconWrapper }>
                         <Image src="/static/icons/star.svg" width="24" height="24" />
-                        <p className={ styles.text }>1</p>
+                        <p className={ styles.text }>{ voting }</p>
                     </div>
                     <button className={ styles.upvoteButton } onClick={ handleUpvoteButton }>
                         Up vote!
