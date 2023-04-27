@@ -28,7 +28,7 @@ export default function Home(props) {
 
     useEffect(() => {
         const setCoffeeStoresByLocation = async () => {  
-            const result = await fetch(`api/coffee-store?latLong=${latLong}&limit=18`)
+            const result = await fetch(`api/getCoffeeStores?latLong=${latLong}&limit=18`)
             const coffeeStores = await result.json()
             dispatch({
                 type: ACTIONS_TYPES.SET_COFFEE_STORES,

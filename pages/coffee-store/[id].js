@@ -53,6 +53,28 @@ const CoffeeStore = (props) => {
 
     const { state: { coffeeStores } } = useContext(StoreContext)
 
+    const handleCreateCoffeeStore = async (coffeeStore) => {
+        try {
+            const { id, name, address, imgUrl, voting } = coffeeStore
+
+            await fetch('/api/createCoffeeStore', {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id,
+                    name,
+                    voting: 0,
+                    imgUrl,
+                    address: address || ''
+                })
+            })
+        } catch (error) {
+            console.error('Error creating coffee store', error)
+        }
+    }   
+
     useEffect(() => {
         if (isEmpty(props.coffeeStore)) {
             if (coffeeStores.length > 0) {
@@ -60,9 +82,12 @@ const CoffeeStore = (props) => {
                     return coffeeStore.id.toString() === id
                 })
                 setCoffeeStore(findCoffeeStoreById)
+                handleCreateCoffeeStore(findCoffeeStoreById)
             }
+        } else {
+            handleCreateCoffeeStore(props.coffeeStore)
         }
-    }, [id])
+    }, [id, props.coffeeStore, coffeeStores])
 
     const { name, address, imgUrl } = coffeeStore
 

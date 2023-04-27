@@ -9,8 +9,6 @@ const fetchCoffeeStores = async (req, res) => {
     } catch (error) {
         res.status(500).json('Ops! Something went wrong.')
     }
-
-    return res
 }
 
 export default fetchCoffeeStores
